@@ -1,5 +1,6 @@
 const socket = io();
 const pathParts = window.location.pathname.split('/');
+// Fix: Extract room ID correctly from /room/roomId URL structure
 const roomId = pathParts[1] === 'room' ? pathParts[2] : null;
 
 const joinContainer = document.getElementById('join-container');
@@ -14,32 +15,65 @@ const sendBtn = document.getElementById('send');
 
 let currentUserName = '';
 
-newRoomBtn.addEventListener('click', () => location.href = '/new');
+// Add error handling for button clicks
+newRoomBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  window.location.href = '/new';
+});
 
-if (roomId) {
+// Show join container only if we have a valid room ID
+if (roomId && roomId.trim() !== '') {
   joinContainer.classList.remove('hidden');
   roomIdDisplay.textContent = roomId;
+  console.log('Room ID found:', roomId); // Debug log
+} else {
+  // If no room ID, redirect to create new room
+  console.log('No room ID found, redirecting to /new');
+  window.location.href = '/new';
 }
 
-joinBtn.addEventListener('click', () => {
+joinBtn.addEventListener('click', (e) => {
+  e.preventDefault();
   const userName = nameInput.value.trim();
-  if (!userName) return;
+  if (!userName) {
+    alert('Please enter your name');
+    return;
+  }
+  if (!roomId) {
+    alert('Invalid room ID');
+    return;
+  }
   currentUserName = userName;
   joinContainer.classList.add('hidden');
   chatContainer.classList.remove('hidden');
   socket.emit('join-room', roomId, userName);
 });
 
+// Add Enter key support for name input
+nameInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    joinBtn.click();
+  }
+});
+
 chatInput.addEventListener('input', () => {
   sendBtn.disabled = !chatInput.value.trim();
 });
 
-sendBtn.addEventListener('click', () => {
+sendBtn.addEventListener('click', (e) => {
+  e.preventDefault();
   const msg = chatInput.value.trim();
   if (!msg) return;
   socket.emit('message', msg);
   chatInput.value = '';
   sendBtn.disabled = true;
+});
+
+// Add Enter key support for chat input
+chatInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    sendBtn.click();
+  }
 });
 
 socket.on('createMessage', (msg, userName) => {
