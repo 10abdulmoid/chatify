@@ -33,14 +33,28 @@ function initializeApp() {
     }
   }
 
+  // Function to reset app state for new room
+  function resetAppState() {
+    currentUserName = '';
+    nameInput.value = '';
+    chatInput.value = '';
+    messagesDiv.innerHTML = '';
+    joinContainer.classList.remove('hidden');
+    chatContainer.classList.add('hidden');
+    sendBtn.disabled = true;
+  }
+
   // Add error handling for button clicks
   newRoomBtn.addEventListener('click', (e) => {
     e.preventDefault();
+    // Instead of just redirecting, fully reload the page to reset state
     window.location.href = '/new';
   });
 
   // Show join container only if we have a valid room ID
   if (roomId && roomId.trim() !== '') {
+    // Reset state when entering a new room
+    resetAppState();
     joinContainer.classList.remove('hidden');
     updateRoomIdDisplay(roomId);
     console.log('Valid room ID found:', roomId);
@@ -68,6 +82,9 @@ function initializeApp() {
     
     // Update room ID display again after showing chat container
     updateRoomIdDisplay(roomId);
+    
+    // Clear any existing messages when joining a new room
+    messagesDiv.innerHTML = '';
     
     socket.emit('join-room', roomId, userName);
   });
