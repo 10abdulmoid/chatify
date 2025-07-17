@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#181a1b" />
+  <title>Chatify</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="container">
+    <div id="join-container">
+      <h1 class="brand-heading">Chatify</h1>
+      <label for="name-input" style="display:none">Name</label>
+      <input type="text" id="name-input" placeholder="Enter your name" autocomplete="username" />
+      <div class="buttons">
+        <button id="join">Join Room</button>
+        <button id="new-room">New Room</button>
+      </div>
+    </div>
+
+    <div id="chat-container" class="hidden">
+      <header>
+        <h2>Room: <span id="room-id"></span></h2>
+      </header>
+      <div id="messages"></div>
+      <div id="input-area">
+        <input id="chat-input" placeholder="Type a message..." autocomplete="off" />
+        <button id="send" disabled>Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
