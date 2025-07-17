@@ -24,7 +24,10 @@ newRoomBtn.addEventListener('click', (e) => {
 // Show join container only if we have a valid room ID
 if (roomId && roomId.trim() !== '') {
   joinContainer.classList.remove('hidden');
-  roomIdDisplay.textContent = roomId;
+  // Set room ID in both join screen and chat header
+  if (roomIdDisplay) {
+    roomIdDisplay.textContent = roomId;
+  }
   console.log('Room ID found:', roomId); // Debug log
 } else {
   // If no room ID, redirect to create new room
@@ -46,6 +49,12 @@ joinBtn.addEventListener('click', (e) => {
   currentUserName = userName;
   joinContainer.classList.add('hidden');
   chatContainer.classList.remove('hidden');
+  
+  // Ensure room ID is displayed in chat header after joining
+  if (roomIdDisplay) {
+    roomIdDisplay.textContent = roomId;
+  }
+  
   socket.emit('join-room', roomId, userName);
 });
 
