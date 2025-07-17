@@ -10,9 +10,9 @@ const io = new Server(server);
 // Serve static assets (public folder)
 app.use(express.static('public'));
 
-// Redirect root to new room
+// Serve landing page without creating a room yet
 app.get('/', (req, res) => {
-  res.redirect('/new');
+  res.sendFile(__dirname + '/public/index.html');
 });
 
 // Route to generate a new chat room
