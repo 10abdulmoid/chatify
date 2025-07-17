@@ -22,8 +22,15 @@ function initializeApp() {
   const messagesDiv = document.getElementById('messages');
   const chatInput = document.getElementById('chat-input');
   const sendBtn = document.getElementById('send');
+  const linkInput = document.getElementById('link-input');
+  const joinLinkBtn = document.getElementById('join-link-btn');
 
   let currentUserName = '';
+
+  // Utility to create a fallback name
+  function generateDefaultName() {
+    return 'Guest-' + Math.floor(1000 + Math.random() * 9000);
+  }
 
   // Function to update room ID display
   function updateRoomIdDisplay(id) {
@@ -47,21 +54,25 @@ function initializeApp() {
   // Add error handling for button clicks
   newRoomBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    // Instead of just redirecting, fully reload the page to reset state
-    window.location.href = '/new';
+    const pendingName = nameInput.value.trim();
+    localStorage.setItem('autoJoinName', pendingName); // may be empty
+    window.location.replace('/new');
   });
 
   // Show join container only if we have a valid room ID
   if (roomId && roomId.trim() !== '') {
-    // Reset state when entering a new room
+    // Entering an existing room via direct link
     resetAppState();
     joinContainer.classList.remove('hidden');
+    joinBtn.disabled = false;
     updateRoomIdDisplay(roomId);
     console.log('Valid room ID found:', roomId);
   } else {
-    console.log('No room ID found, redirecting to /new');
-    window.location.href = '/new';
-    return;
+    // No room yet – landing page mode
+    resetAppState();
+    joinContainer.classList.remove('hidden');
+    joinBtn.disabled = true; // cannot join until a room is loaded
+    console.log('Landing page – waiting for user to create or paste room');
   }
 
   joinBtn.addEventListener('click', (e) => {
@@ -89,6 +100,26 @@ function initializeApp() {
     socket.emit('join-room', roomId, userName);
   });
 
+  if (joinLinkBtn) {
+    joinLinkBtn.addEventListener('click', () => {
+      const link = linkInput.value.trim();
+      if (!link) return;
+      const pendingName = nameInput.value.trim();
+      localStorage.setItem('autoJoinName', pendingName);
+      try {
+        const url = new URL(link, window.location.origin);
+        // if link contains /room/<id> navigate directly
+        if (url.pathname.startsWith('/room/')) {
+          window.location.href = url.pathname;
+        } else {
+          alert('Invalid room link');
+        }
+      } catch (err) {
+        alert('Invalid URL');
+      }
+    });
+  }
+
   // Add Enter key support for name input
   nameInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
@@ -115,6 +146,20 @@ function initializeApp() {
       sendBtn.click();
     }
   });
+
+  // Auto-join logic when landing directly on /room/:id
+  if (roomId) {
+    const storedName = localStorage.getItem('autoJoinName');
+    if (storedName !== null) {
+      localStorage.removeItem('autoJoinName'); // consume it
+      const finalName = storedName && storedName.trim() !== '' ? storedName : generateDefaultName();
+      currentUserName = finalName;
+      joinContainer.classList.add('hidden');
+      chatContainer.classList.remove('hidden');
+      updateRoomIdDisplay(roomId);
+      socket.emit('join-room', roomId, finalName);
+    }
+  }
 
   socket.on('createMessage', (msg, userName) => {
     const el = document.createElement('div');
