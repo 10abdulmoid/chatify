@@ -11,7 +11,7 @@ It allows users to create rooms, send instant messages, and experience a smooth 
 - 👥 **Private & group chats**
 - 📱 **Responsive UI** (works on mobile & desktop)
 - 🎨 **Dark mode support** (planned)
-
+- 🎨 **Toggle butto to shift between dark and light modes** (planned)
 ---
 
 ## 🛠️ Tech Stack
